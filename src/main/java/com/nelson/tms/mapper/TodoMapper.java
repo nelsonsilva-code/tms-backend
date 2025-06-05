@@ -3,6 +3,7 @@ package com.nelson.tms.mapper;
 import com.nelson.tms.dto.TodoDto;
 import com.nelson.tms.entity.Todo;
 
+//Currently using ModelMapper
 public class TodoMapper {
     public static TodoDto mapToTodoDto(Todo todo) {
         return new TodoDto(
