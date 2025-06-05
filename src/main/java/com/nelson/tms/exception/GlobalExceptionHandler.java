@@ -51,7 +51,13 @@ public class GlobalExceptionHandler {
 
     @RequestBody
     @ExceptionHandler(TodoNotFoundException.class)
-    public ResponseEntity<HttpStatus> handleNotFound() {
+    public ResponseEntity<HttpStatus> handleTodoNotFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @RequestBody
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<HttpStatus> handleUserNotFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
