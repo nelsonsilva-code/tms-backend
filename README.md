@@ -28,4 +28,5 @@ CREATE USER 'tms'@'localhost' IDENTIFIED BY 'Mysql@123';
 GRANT ALL PRIVILEGES ON *.* TO 'tms'@'localhost' WITH GRANT OPTION;
 ```
 
+Add SPRING_USERNAME and SPRING_PASSWORD variables to your env vars on IDE
 Run backend with SpringBoot and Java 17
