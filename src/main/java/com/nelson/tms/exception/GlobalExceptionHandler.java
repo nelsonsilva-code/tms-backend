@@ -48,4 +48,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body("Malformed JSON or invalid types in request.");
     }
+
+    @RequestBody
+    @ExceptionHandler(TodoNotFoundException.class)
+    public ResponseEntity<HttpStatus> handleNotFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }

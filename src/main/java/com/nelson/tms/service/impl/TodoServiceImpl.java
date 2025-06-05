@@ -2,7 +2,7 @@ package com.nelson.tms.service.impl;
 
 import com.nelson.tms.dto.TodoDto;
 import com.nelson.tms.entity.Todo;
-import com.nelson.tms.exception.ResourceNotFoundException;
+import com.nelson.tms.exception.TodoNotFoundException;
 import com.nelson.tms.repository.TodoRepository;
 import com.nelson.tms.service.TodoService;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,24 +30,18 @@ public class TodoServiceImpl implements TodoService  {
 
     public List<TodoDto> getAllTodo() {
 
-        long start = System.currentTimeMillis();
-
         List<Todo> todos = todoRepository.findAll();
 
 
-        List<TodoDto> todosList =  todos.stream()
+        return todos.stream()
                 .map((todo -> modelMapper.map(todo, TodoDto.class)))
                 .collect(Collectors.toList());
-
-        System.out.println("Time to fetch and map todos: " + (System.currentTimeMillis() - start) + "ms");
-
-        return todosList;
     }
 
     public TodoDto getTodoById(Long id) {
 
         Todo todo = todoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Todo with given ID does not exist."));
+                .orElseThrow(() -> new TodoNotFoundException());
 
         return modelMapper.map(todo, TodoDto.class);
 
