@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @RequestBody
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
+    public ResponseEntity<String> handleGeneralException() {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("An unexpected error occurred.");
@@ -55,9 +55,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<HttpStatus> handleInvalidPassword() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
     @RequestBody
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<HttpStatus> handleUserNotFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @RequestBody
+    @ExceptionHandler(EmailNotFoundException.class)
+    public ResponseEntity<HttpStatus> handleEmailNotFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<String> handleExistingUsername() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleExistingEmail() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
     }
 }
