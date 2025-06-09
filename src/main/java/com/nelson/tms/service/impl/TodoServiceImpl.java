@@ -32,7 +32,6 @@ public class TodoServiceImpl implements TodoService  {
 
         List<Todo> todos = todoRepository.findAll();
 
-
         return todos.stream()
                 .map((todo -> modelMapper.map(todo, TodoDto.class)))
                 .collect(Collectors.toList());

@@ -80,4 +80,15 @@ public class AuthServiceImpl implements AuthService {
 
         return HttpStatus.OK;
     }
+
+    public HttpStatus delete(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        user.getRoles().clear();
+        userRepository.flush();
+        userRepository.delete(user);
+
+        return HttpStatus.OK;
+    }
 }

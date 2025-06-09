@@ -3,6 +3,7 @@ package com.nelson.tms.exception;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -80,5 +81,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleExistingEmail() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDenied() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
