@@ -67,20 +67,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    @RequestBody
-    @ExceptionHandler(EmailNotFoundException.class)
-    public ResponseEntity<HttpStatus> handleEmailNotFound() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ResponseEntity<String> handleExistingUsername() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<String> handleExistingEmail() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
     }
 
     @ExceptionHandler(AccessDeniedException.class)

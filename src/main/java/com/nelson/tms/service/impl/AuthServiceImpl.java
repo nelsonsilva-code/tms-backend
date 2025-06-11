@@ -6,7 +6,6 @@ import com.nelson.tms.dto.CreateUserDto;
 import com.nelson.tms.dto.UpdatePasswordDto;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.entity.User;
-import com.nelson.tms.exception.EmailAlreadyExistsException;
 import com.nelson.tms.exception.InvalidPasswordException;
 import com.nelson.tms.exception.UserNotFoundException;
 import com.nelson.tms.exception.UsernameAlreadyExistsException;
@@ -58,13 +57,9 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new UsernameAlreadyExistsException();
         }
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new EmailAlreadyExistsException();
-        }
 
         User user = new User();
         user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         user.setRole(resolveRole(dto.getRole()));
