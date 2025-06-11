@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
 
-    public void createUser(CreateUserDto createUserDto) {
+    public void createUser(CreateUserDto createUserDto, Authentication authentication) {
 
         if (userRepository.existsByUsername(createUserDto.getUsername())) {
            throw new UsernameAlreadyExistsException();
@@ -47,7 +47,11 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(createUserDto.getUsername());
         user.setEmail(createUserDto.getEmail());
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
-        Role role = roleRepository.findByName("ROLE_USER");
+
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        Role role = roleRepository.findByName(isAdmin ? createUserDto.getRole() : "ROLE_USER");
+
         user.setRole(role);
 
         userRepository.save(user);

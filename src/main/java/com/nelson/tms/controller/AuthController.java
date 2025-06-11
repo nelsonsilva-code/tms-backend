@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
@@ -21,8 +22,9 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/create-user")
-    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto) {
-        authService.createUser(createUserDto);
+    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto, Authentication authentication) {
+
+        authService.createUser(createUserDto, authentication);
         return ResponseEntity.ok().build();
     }
 

@@ -1,7 +1,5 @@
 package com.nelson.tms.dto;
 
-
-import com.nelson.tms.entity.Role;
 import lombok.*;
 
 @Getter
@@ -16,5 +14,5 @@ public class CreateUserDto {
     private String username;
     private String email;
     private String password;
-    private Role role;
+    private String role;
 }
