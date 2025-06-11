@@ -3,7 +3,7 @@ package com.nelson.tms.controller;
 
 import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.RegisterDto;
+import com.nelson.tms.dto.CreateUserDto;
 import com.nelson.tms.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,9 +19,10 @@ public class AuthController {
 
     private AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
-        authService.register(registerDto);
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PostMapping("/create-user")
+    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto) {
+        authService.createUser(createUserDto);
         return ResponseEntity.ok().build();
     }
 

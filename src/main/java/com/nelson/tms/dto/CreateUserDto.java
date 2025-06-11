@@ -1,6 +1,7 @@
 package com.nelson.tms.dto;
 
 
+import com.nelson.tms.entity.Role;
 import lombok.*;
 
 @Getter
@@ -8,11 +9,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class RegisterDto {
+public class CreateUserDto {
 
     private Long id;
     private String name;
     private String username;
     private String email;
     private String password;
+    private Role role;
 }
