@@ -1,5 +1,6 @@
 package com.nelson.tms.service.impl;
 
+import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.RegisterDto;
 import com.nelson.tms.entity.Role;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -61,14 +63,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginDto loginDto) {
+    public JwtAuthResponse login(LoginDto loginDto) {
 
         User user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new UserNotFoundException());
 
         boolean passwordCorrect = passwordEncoder.matches(loginDto.getPassword(), user.getPassword());
 
-        System.out.println(passwordCorrect);
         if (!passwordCorrect) {
             throw new InvalidPasswordException();
         }
@@ -81,8 +82,14 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        String token = jwtTokenProvider.generateToken(authentication);
 
-        return jwtTokenProvider.generateToken(authentication);
+        String role = user.getRoles().stream().findFirst().get().getName();
+
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setRole(role);
+        return jwtAuthResponse;
     }
 
     public HttpStatus delete(Long id) {
@@ -92,7 +99,6 @@ public class AuthServiceImpl implements AuthService {
         user.getRoles().clear();
         userRepository.flush();
         userRepository.delete(user);
-
         return HttpStatus.OK;
     }
 }
