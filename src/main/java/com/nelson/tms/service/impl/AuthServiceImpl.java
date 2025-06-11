@@ -14,6 +14,7 @@ import com.nelson.tms.repository.UserRepository;
 import com.nelson.tms.security.JwtTokenProvider;
 import com.nelson.tms.service.AuthService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -32,30 +35,40 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
 
-    public void createUser(CreateUserDto createUserDto, Authentication authentication) {
+    private final Role defaultUserRole;
 
-        if (userRepository.existsByUsername(createUserDto.getUsername())) {
-           throw new UsernameAlreadyExistsException();
+    @Autowired
+    public AuthServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager,
+                           JwtTokenProvider jwtTokenProvider) {
+        this.userRepository        = userRepository;
+        this.roleRepository        = roleRepository;
+        this.passwordEncoder       = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider      = jwtTokenProvider;
+        this.defaultUserRole = roleRepository
+                .findByName("ROLE_USER")
+                .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
+    }
+
+    public void createUser(CreateUserDto dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new UsernameAlreadyExistsException();
         }
-
-        if (userRepository.existsByEmail(createUserDto.getEmail())) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
 
         User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        user.setUsername(createUserDto.getUsername());
-        user.setEmail(createUserDto.getEmail());
-        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
-
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        Role role = roleRepository.findByName(isAdmin ? createUserDto.getRole() : "ROLE_USER");
-
-        user.setRole(role);
+        user.setRole(resolveRole(dto.getRole()));
 
         userRepository.save(user);
-
     }
 
     @Override
@@ -95,5 +108,25 @@ public class AuthServiceImpl implements AuthService {
         userRepository.flush();
         userRepository.delete(user);
         return HttpStatus.OK;
+    }
+
+    private Role resolveRole(String requestedRoleName) {
+        if (!isAdmin()) {
+            return defaultUserRole;
+        }
+        return Optional.ofNullable(requestedRoleName)
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .flatMap(roleRepository::findByName)
+                .orElse(defaultUserRole);
+    }
+
+    private boolean isAdmin() {
+        return SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 public interface AuthService {
-    void createUser(CreateUserDto createUserDto, Authentication authentication);
+    void createUser(CreateUserDto createUserDto);
 
     JwtAuthResponse login(LoginDto loginDto);
 

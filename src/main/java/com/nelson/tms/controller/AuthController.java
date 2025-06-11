@@ -22,9 +22,9 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/create-user")
-    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto, Authentication authentication) {
+    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto) {
 
-        authService.createUser(createUserDto, authentication);
+        authService.createUser(createUserDto);
         return ResponseEntity.ok().build();
     }
 
