@@ -3,8 +3,8 @@ package com.nelson.tms.service;
 import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.CreateUserDto;
+import com.nelson.tms.dto.UpdatePasswordDto;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 
 public interface AuthService {
     void createUser(CreateUserDto createUserDto);
@@ -12,4 +12,6 @@ public interface AuthService {
     JwtAuthResponse login(LoginDto loginDto);
 
     HttpStatus delete(Long id);
+
+    HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto);
 }

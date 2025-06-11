@@ -3,6 +3,7 @@ package com.nelson.tms.service.impl;
 import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.CreateUserDto;
+import com.nelson.tms.dto.UpdatePasswordDto;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.entity.User;
 import com.nelson.tms.exception.EmailAlreadyExistsException;
@@ -17,12 +18,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
@@ -107,6 +108,24 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.flush();
         userRepository.delete(user);
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    updatePasswordDto.getUsername(),
+                    updatePasswordDto.getOldPassword()
+            ));
+        } catch (BadCredentialsException ex) {
+            return HttpStatus.UNAUTHORIZED;
+        }
+
+        User user = userRepository.findByUsername(updatePasswordDto.getUsername())
+                .orElseThrow(() -> new UserNotFoundException());
+
+        user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        userRepository.save(user);
         return HttpStatus.OK;
     }
 
