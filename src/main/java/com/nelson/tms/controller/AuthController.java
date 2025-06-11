@@ -1,10 +1,10 @@
 package com.nelson.tms.controller;
 
 
+import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.RegisterDto;
 import com.nelson.tms.service.AuthService;
-import jakarta.annotation.security.PermitAll;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +26,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<HttpStatus> login(@RequestBody LoginDto loginDto) {
-        HttpStatus httpStatus = authService.login(loginDto);
-        return ResponseEntity.status(httpStatus).build();
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto) {
+        String token = authService.login(loginDto);
+
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+
+        return new ResponseEntity<>(jwtAuthResponse, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

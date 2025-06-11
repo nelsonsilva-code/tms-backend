@@ -10,6 +10,7 @@ import com.nelson.tms.exception.UserNotFoundException;
 import com.nelson.tms.exception.UsernameAlreadyExistsException;
 import com.nelson.tms.repository.RoleRepository;
 import com.nelson.tms.repository.UserRepository;
+import com.nelson.tms.security.JwtTokenProvider;
 import com.nelson.tms.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
 
     public void register(RegisterDto registerDto) {
 
@@ -59,15 +61,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public HttpStatus login(LoginDto loginDto) {
+    public String login(LoginDto loginDto) {
 
         User user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new UserNotFoundException());
 
-        System.out.println("Checking password");
         boolean passwordCorrect = passwordEncoder.matches(loginDto.getPassword(), user.getPassword());
+
+        System.out.println(passwordCorrect);
         if (!passwordCorrect) {
-            System.out.println("Wrong password");
             throw new InvalidPasswordException();
         }
 
@@ -76,9 +78,11 @@ public class AuthServiceImpl implements AuthService {
                 loginDto.getPassword()
         ));
 
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return HttpStatus.OK;
+
+        return jwtTokenProvider.generateToken(authentication);
     }
 
     public HttpStatus delete(Long id) {
