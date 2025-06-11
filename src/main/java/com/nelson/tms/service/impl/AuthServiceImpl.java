@@ -2,7 +2,7 @@ package com.nelson.tms.service.impl;
 
 import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.RegisterDto;
+import com.nelson.tms.dto.CreateUserDto;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.entity.User;
 import com.nelson.tms.exception.EmailAlreadyExistsException;
@@ -22,10 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -36,27 +32,23 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
 
-    public void register(RegisterDto registerDto) {
+    public void createUser(CreateUserDto createUserDto) {
 
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
+        if (userRepository.existsByUsername(createUserDto.getUsername())) {
            throw new UsernameAlreadyExistsException();
         }
 
-        if (userRepository.existsByEmail(registerDto.getEmail())) {
+        if (userRepository.existsByEmail(createUserDto.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
 
         User user = new User();
 
-        user.setUsername(registerDto.getUsername());
-        user.setEmail(registerDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-
-        Set<Role> roles = new HashSet<>();
+        user.setUsername(createUserDto.getUsername());
+        user.setEmail(createUserDto.getEmail());
+        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
         Role role = roleRepository.findByName("ROLE_USER");
-
-        roles.add(role);
-        user.setRoles(roles);
+        user.setRole(role);
 
         userRepository.save(user);
 
@@ -84,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtTokenProvider.generateToken(authentication);
 
-        String role = user.getRoles().stream().findFirst().get().getName();
+        String role = user.getRole().getName();
 
         JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
         jwtAuthResponse.setAccessToken(token);
@@ -96,7 +88,6 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException());
 
-        user.getRoles().clear();
         userRepository.flush();
         userRepository.delete(user);
         return HttpStatus.OK;

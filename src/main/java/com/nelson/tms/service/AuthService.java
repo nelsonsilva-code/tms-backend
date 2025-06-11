@@ -2,11 +2,11 @@ package com.nelson.tms.service;
 
 import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.RegisterDto;
+import com.nelson.tms.dto.CreateUserDto;
 import org.springframework.http.HttpStatus;
 
 public interface AuthService {
-    void register(RegisterDto registerDto);
+    void createUser(CreateUserDto createUserDto);
 
     JwtAuthResponse login(LoginDto loginDto);
 

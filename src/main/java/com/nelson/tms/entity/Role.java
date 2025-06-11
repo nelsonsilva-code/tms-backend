@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,11 +16,17 @@ import java.util.List;
 @Entity
 @Table(name = "role")
 public class Role {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "role_permissions",
+            joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "permission")
+    @Enumerated(EnumType.STRING)
+    private Set<Permission> permissions = new HashSet<>();
 }
