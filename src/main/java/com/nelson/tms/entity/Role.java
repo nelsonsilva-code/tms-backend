@@ -1,10 +1,13 @@
 package com.nelson.tms.entity;
 
+import com.nelson.tms.utils.PermissionSetConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,5 +24,6 @@ public class Role {
     private String name;
 
     @Column(nullable = false, length = 1024)
-    private String permissions;
+    @Convert(converter = PermissionSetConverter.class)
+    private Set<Permission> permissions;
 }

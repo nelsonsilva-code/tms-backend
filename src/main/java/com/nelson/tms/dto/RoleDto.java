@@ -1,7 +1,10 @@
 package com.nelson.tms.dto;
 
+import com.nelson.tms.entity.Permission;
 import jakarta.persistence.Column;
 import lombok.*;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -13,5 +16,5 @@ public class RoleDto {
     private String name;
 
     @Column(nullable = false, length = 1024)
-    private String permissions;
+    private Set<Permission> permissions;
 }
