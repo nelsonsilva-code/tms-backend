@@ -2,7 +2,9 @@ package com.nelson.tms.controller;
 
 
 import com.nelson.tms.dto.*;
+import com.nelson.tms.entity.Permission;
 import com.nelson.tms.entity.Role;
+import com.nelson.tms.entity.User;
 import com.nelson.tms.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -47,7 +49,7 @@ public class AuthController {
         return ResponseEntity.status(httpStatus).build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/roles")
     public ResponseEntity<List> getRoles() {
         List<Role> roles = authService.getRoles();
@@ -55,11 +57,29 @@ public class AuthController {
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/roles/create")
     public ResponseEntity<Role> createRole(@Valid @RequestBody RoleDto roleDto) {
+        System.out.println(roleDto);
         Role role = authService.createRole(roleDto);
 
         return new ResponseEntity<>(role, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @GetMapping("/permissions")
+    public ResponseEntity<Permission[]> getPermissionList() {
+        Permission[] permissions = authService.getPermissionList();
+
+        return new ResponseEntity<>(permissions, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @GetMapping("/users")
+    public ResponseEntity<List> getUsers() {
+        List<User> users = authService.getUsers();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
 }

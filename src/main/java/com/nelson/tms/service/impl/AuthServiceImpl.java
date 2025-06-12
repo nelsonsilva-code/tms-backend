@@ -1,6 +1,7 @@
 package com.nelson.tms.service.impl;
 
 import com.nelson.tms.dto.*;
+import com.nelson.tms.entity.Permission;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.entity.User;
 import com.nelson.tms.exception.InvalidPasswordException;
@@ -128,6 +129,10 @@ public class AuthServiceImpl implements AuthService {
         return roleRepository.findAll();
     }
 
+    public Permission[] getPermissionList() {
+        return Permission.values();
+    }
+
     public Role createRole(RoleDto roleDto) {
         String givenRoleName = roleDto.getName();
 
@@ -147,6 +152,11 @@ public class AuthServiceImpl implements AuthService {
 
         return roleRepository.save(role);
     }
+
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
+
 
     private Role resolveRole(String requestedRoleName) {
         if (!isAdmin()) {
