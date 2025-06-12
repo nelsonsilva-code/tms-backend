@@ -76,4 +76,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAccessDenied() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @ExceptionHandler(RoleAlreadyExistsException.class)
+    public ResponseEntity<String> handleExistingRole() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Role with given name already exists");
+    }
 }
