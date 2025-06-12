@@ -129,17 +129,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public Role createRole(RoleDto roleDto) {
-
-        if(roleRepository.findByName(roleDto.getName()).isPresent()) {
-            throw new RoleAlreadyExistsException();
-        }
-        Role role = new Role();
-
         String givenRoleName = roleDto.getName();
 
         String roleName = givenRoleName.startsWith("ROLE_")
                 ? givenRoleName
                 : "ROLE_" + givenRoleName;
+
+        if(roleRepository.findByName(roleName).isPresent()) {
+            throw new RoleAlreadyExistsException();
+        }
+
+        Role role = new Role();
 
         role.setName(roleName);
 
