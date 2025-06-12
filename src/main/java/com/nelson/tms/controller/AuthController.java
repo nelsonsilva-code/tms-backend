@@ -6,6 +6,7 @@ import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.CreateUserDto;
 import com.nelson.tms.dto.UpdatePasswordDto;
 import com.nelson.tms.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,7 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/create-user")
-    public ResponseEntity<String> createUser(@RequestBody CreateUserDto createUserDto) {
-
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserDto createUserDto) {
         authService.createUser(createUserDto);
         return ResponseEntity.ok().build();
     }
@@ -43,7 +43,7 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','USER')")
     @PatchMapping("/update-password")
-    public ResponseEntity<HttpStatus> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto){
+    public ResponseEntity<HttpStatus> updatePassword(@Valid @RequestBody UpdatePasswordDto updatePasswordDto){
         HttpStatus httpStatus = authService.updatePassword(updatePasswordDto);
         return ResponseEntity.status(httpStatus).build();
     }
