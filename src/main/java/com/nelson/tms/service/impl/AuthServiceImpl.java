@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -122,6 +123,10 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
         userRepository.save(user);
         return HttpStatus.OK;
+    }
+
+    public List<Role> getRoles() {
+        return roleRepository.findAll();
     }
 
     private Role resolveRole(String requestedRoleName) {

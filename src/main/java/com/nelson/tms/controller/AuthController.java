@@ -5,6 +5,7 @@ import com.nelson.tms.dto.JwtAuthResponse;
 import com.nelson.tms.dto.LoginDto;
 import com.nelson.tms.dto.CreateUserDto;
 import com.nelson.tms.dto.UpdatePasswordDto;
+import com.nelson.tms.entity.Role;
 import com.nelson.tms.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
@@ -46,5 +48,13 @@ public class AuthController {
     public ResponseEntity<HttpStatus> updatePassword(@Valid @RequestBody UpdatePasswordDto updatePasswordDto){
         HttpStatus httpStatus = authService.updatePassword(updatePasswordDto);
         return ResponseEntity.status(httpStatus).build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/roles")
+    public ResponseEntity<List> getRoles() {
+        List<Role> roles = authService.getRoles();
+
+        return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 }
