@@ -19,7 +19,7 @@ public interface AuthService {
 
     List<Role> getRoles();
 
-    Role createRole(RoleDto roleDto);
+    void createRole(RoleDto roleDto);
 
     Permission[] getPermissionList();
 

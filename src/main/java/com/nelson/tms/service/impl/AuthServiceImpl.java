@@ -133,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
         return Permission.values();
     }
 
-    public Role createRole(RoleDto roleDto) {
+    public void createRole(RoleDto roleDto) {
         String givenRoleName = roleDto.getName();
 
         String roleName = givenRoleName.startsWith("ROLE_")
@@ -148,9 +148,7 @@ public class AuthServiceImpl implements AuthService {
 
         role.setName(roleName);
 
-        role.setPermissions(roleDto.getPermissions());
-
-        return roleRepository.save(role);
+        roleRepository.save(role);
     }
 
     public List<User> getUsers() {

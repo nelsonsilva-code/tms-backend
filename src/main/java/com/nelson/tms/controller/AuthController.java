@@ -60,10 +60,9 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/roles/create")
     public ResponseEntity<Role> createRole(@Valid @RequestBody RoleDto roleDto) {
-        System.out.println(roleDto);
-        Role role = authService.createRole(roleDto);
+        authService.createRole(roleDto);
 
-        return new ResponseEntity<>(role, HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
