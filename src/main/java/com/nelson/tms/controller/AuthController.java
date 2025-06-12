@@ -58,7 +58,6 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/roles/create")
     public ResponseEntity<Role> createRole(@Valid @RequestBody RoleDto roleDto) {
-        System.out.println("Post mapping");
         Role role = authService.createRole(roleDto);
 
         return new ResponseEntity<>(role, HttpStatus.OK);
