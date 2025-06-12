@@ -53,16 +53,16 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
     }
 
-    public void createUser(CreateUserDto dto) {
-        if (userRepository.existsByUsername(dto.getUsername())) {
+    public void createUser(CreateUserDto createUserDto) {
+        if (userRepository.existsByUsername(createUserDto.getUsername())) {
             throw new UsernameAlreadyExistsException();
         }
 
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setUsername(createUserDto.getUsername());
+        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
 
-        user.setRole(resolveRole(dto.getRole()));
+        user.setRole(resolveRole(createUserDto.getRole()));
 
         userRepository.save(user);
     }
