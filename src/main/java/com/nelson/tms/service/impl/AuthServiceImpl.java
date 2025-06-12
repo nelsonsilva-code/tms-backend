@@ -1,12 +1,10 @@
 package com.nelson.tms.service.impl;
 
-import com.nelson.tms.dto.JwtAuthResponse;
-import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.CreateUserDto;
-import com.nelson.tms.dto.UpdatePasswordDto;
+import com.nelson.tms.dto.*;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.entity.User;
 import com.nelson.tms.exception.InvalidPasswordException;
+import com.nelson.tms.exception.RoleAlreadyExistsException;
 import com.nelson.tms.exception.UserNotFoundException;
 import com.nelson.tms.exception.UsernameAlreadyExistsException;
 import com.nelson.tms.repository.RoleRepository;
@@ -128,6 +126,26 @@ public class AuthServiceImpl implements AuthService {
 
     public List<Role> getRoles() {
         return roleRepository.findAll();
+    }
+
+    public Role createRole(RoleDto roleDto) {
+
+        if(roleRepository.findByName(roleDto.getName()).isPresent()) {
+            throw new RoleAlreadyExistsException();
+        }
+        Role role = new Role();
+
+        String givenRoleName = roleDto.getName();
+
+        String roleName = givenRoleName.startsWith("ROLE_")
+                ? givenRoleName
+                : "ROLE_" + givenRoleName;
+
+        role.setName(roleName);
+
+        role.setPermissions(roleDto.getPermissions());
+
+        return roleRepository.save(role);
     }
 
     private Role resolveRole(String requestedRoleName) {

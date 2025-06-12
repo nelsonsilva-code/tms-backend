@@ -1,9 +1,6 @@
 package com.nelson.tms.service;
 
-import com.nelson.tms.dto.JwtAuthResponse;
-import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.CreateUserDto;
-import com.nelson.tms.dto.UpdatePasswordDto;
+import com.nelson.tms.dto.*;
 import com.nelson.tms.entity.Role;
 import org.springframework.http.HttpStatus;
 
@@ -19,4 +16,6 @@ public interface AuthService {
     HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long id);
 
     List<Role> getRoles();
+
+    Role createRole(RoleDto roleDto);
 }

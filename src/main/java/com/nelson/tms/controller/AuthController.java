@@ -1,10 +1,7 @@
 package com.nelson.tms.controller;
 
 
-import com.nelson.tms.dto.JwtAuthResponse;
-import com.nelson.tms.dto.LoginDto;
-import com.nelson.tms.dto.CreateUserDto;
-import com.nelson.tms.dto.UpdatePasswordDto;
+import com.nelson.tms.dto.*;
 import com.nelson.tms.entity.Role;
 import com.nelson.tms.service.AuthService;
 import jakarta.validation.Valid;
@@ -56,5 +53,14 @@ public class AuthController {
         List<Role> roles = authService.getRoles();
 
         return new ResponseEntity<>(roles, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/roles/create")
+    public ResponseEntity<Role> createRole(@Valid @RequestBody RoleDto roleDto) {
+        System.out.println("Post mapping");
+        Role role = authService.createRole(roleDto);
+
+        return new ResponseEntity<>(role, HttpStatus.OK);
     }
 }
