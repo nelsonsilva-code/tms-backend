@@ -24,7 +24,7 @@ public class AuthController {
     private AuthService authService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @PostMapping("/create-user")
+    @PostMapping("/users/create")
     public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserDto createUserDto) {
         authService.createUser(createUserDto);
         return ResponseEntity.ok().build();
@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/users/{id}/delete")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
         HttpStatus httpStatus = authService.delete(id);
         return ResponseEntity.status(httpStatus).build();
