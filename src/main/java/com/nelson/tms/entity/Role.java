@@ -6,10 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,18 +22,4 @@ public class Role {
 
     @Column(nullable = false, length = 1024)
     private String permissions;
-
-    @Transient
-    public Set<Permission> getPermissionSet() {
-        return Arrays.stream(permissions.split(","))
-                .map(Permission::valueOf)
-                .collect(Collectors.toSet());
-    }
-
-    @Transient
-    public void setPermissionSet(Set<Permission> perms) {
-        this.permissions = perms.stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(","));
-    }
 }
