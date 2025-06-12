@@ -24,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -61,7 +63,6 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setUsername(createUserDto.getUsername());
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
-
         user.setRole(resolveRole(createUserDto.getRole()));
 
         userRepository.save(user);
@@ -144,9 +145,20 @@ public class AuthServiceImpl implements AuthService {
             throw new RoleAlreadyExistsException();
         }
 
-        Role role = new Role();
+        Set<Permission> perms = roleDto.getPermissions().stream()
+                .collect(Collectors.toSet());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(ga -> ga.getAuthority().equals("ROLE_ADMIN"));
+
+        if (perms.remove(Permission.DELETE) && !isAdmin) {
+            System.out.println("Non-admin user attempted to assign DELETE; stripped out - " +  auth.getName());
+        }
+
+        Role role = new Role();
         role.setName(roleName);
+        role.setPermissions(perms);
 
         roleRepository.save(role);
     }
