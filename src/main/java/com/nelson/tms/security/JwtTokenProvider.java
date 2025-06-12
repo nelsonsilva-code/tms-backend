@@ -26,10 +26,8 @@ public class JwtTokenProvider {
         String username = authentication.getName();
 
         Date currentDate = new Date();
-        System.out.println("currentDate - " + currentDate);
 
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-        System.out.println("expireDate - " + expireDate);
 
         String token = Jwts.builder()
                 .setSubject(username)
@@ -37,8 +35,6 @@ public class JwtTokenProvider {
                 .setExpiration(expireDate)
                 .signWith(key())
                 .compact();
-
-        System.out.println("token - " + token);
 
         return token;
     }
