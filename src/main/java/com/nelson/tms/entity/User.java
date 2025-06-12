@@ -11,11 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name = "tms_user")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -26,8 +25,8 @@ public class User {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
-            name = "role_name",
-            referencedColumnName = "name"
+            name = "role_id",
+            referencedColumnName = "id"
     )
     private Role role;
 }

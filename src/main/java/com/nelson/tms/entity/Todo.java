@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "todo")
+@Table(name = "tms_todo")
 public class Todo {
 
     @Id

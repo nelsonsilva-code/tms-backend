@@ -6,15 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "role")
+@Table(name = "tms_role")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +24,20 @@ public class Role {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "role_permissions",
-            joinColumns = @JoinColumn(name = "role_id"))
-    @Column(name = "permission")
-    @Enumerated(EnumType.STRING)
-    private Set<Permission> permissions = new HashSet<>();
+    @Column(nullable = false, length = 1024)
+    private String permissions;
+
+    @Transient
+    public Set<Permission> getPermissionSet() {
+        return Arrays.stream(permissions.split(","))
+                .map(Permission::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    @Transient
+    public void setPermissionSet(Set<Permission> perms) {
+        this.permissions = perms.stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(","));
+    }
 }
