@@ -16,7 +16,7 @@ public interface AuthService {
 
     HttpStatus delete(Long id);
 
-    HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto);
+    HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long id);
 
     List<Role> getRoles();
 }

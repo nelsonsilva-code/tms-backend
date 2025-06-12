@@ -11,7 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdatePasswordDto {
-    private String username;
     private String oldPassword;
     @Pattern(
             regexp = "^(?=.*[A-Z])(?=.{12,}$)(?!.*\\s)[A-Za-z\\d!@_-]+$",

@@ -44,9 +44,9 @@ public class AuthController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','USER')")
-    @PatchMapping("/update-password")
-    public ResponseEntity<HttpStatus> updatePassword(@Valid @RequestBody UpdatePasswordDto updatePasswordDto){
-        HttpStatus httpStatus = authService.updatePassword(updatePasswordDto);
+    @PatchMapping("/users/{id}/update-password")
+    public ResponseEntity<HttpStatus> updatePassword(@Valid @RequestBody UpdatePasswordDto updatePasswordDto, @PathVariable Long id){
+        HttpStatus httpStatus = authService.updatePassword(updatePasswordDto, id);
         return ResponseEntity.status(httpStatus).build();
     }
 

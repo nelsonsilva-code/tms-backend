@@ -107,18 +107,19 @@ public class AuthServiceImpl implements AuthService {
         return HttpStatus.OK;
     }
 
-    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto) {
+    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    updatePasswordDto.getUsername(),
+                    user.getUsername(),
                     updatePasswordDto.getOldPassword()
             ));
         } catch (BadCredentialsException ex) {
             return HttpStatus.UNAUTHORIZED;
         }
-
-        User user = userRepository.findByUsername(updatePasswordDto.getUsername())
-                .orElseThrow(() -> new UserNotFoundException());
 
         user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
         userRepository.save(user);
