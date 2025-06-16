@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private UserRepository userRepository;
-    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
@@ -46,26 +45,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                      AuthenticationManager authenticationManager,
                                      JwtTokenProvider jwtTokenProvider) {
         this.userRepository        = userRepository;
-        this.roleRepository        = roleRepository;
         this.passwordEncoder       = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider      = jwtTokenProvider;
         this.defaultUserRole = roleRepository
                 .findByName("ROLE_USER")
                 .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
-    }
-
-    public void createUser(CreateUserDto createUserDto) {
-        if (userRepository.existsByUsername(createUserDto.getUsername())) {
-            throw new UsernameAlreadyExistsException();
-        }
-
-        User user = new User();
-        user.setUsername(createUserDto.getUsername());
-        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
-        user.setRole(resolveRole(createUserDto.getRole()));
-
-        userRepository.save(user);
     }
 
     @Override
@@ -96,95 +81,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         jwtAuthResponse.setAccessToken(token);
         jwtAuthResponse.setRole(role);
         return jwtAuthResponse;
-    }
-
-    public HttpStatus delete(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException());
-
-        userRepository.flush();
-        userRepository.delete(user);
-        return HttpStatus.OK;
-    }
-
-    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long id) {
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException());
-
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    user.getUsername(),
-                    updatePasswordDto.getOldPassword()
-            ));
-        } catch (BadCredentialsException ex) {
-            return HttpStatus.UNAUTHORIZED;
-        }
-
-        user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
-        userRepository.save(user);
-        return HttpStatus.OK;
-    }
-
-    public List<Role> getRoles() {
-        return roleRepository.findAll();
-    }
-
-    public Permission[] getPermissionList() {
-        return Permission.values();
-    }
-
-    public void createRole(RoleDto roleDto) {
-        String givenRoleName = roleDto.getName();
-
-        String roleName = givenRoleName.startsWith("ROLE_")
-                ? givenRoleName
-                : "ROLE_" + givenRoleName;
-
-        if(roleRepository.findByName(roleName).isPresent()) {
-            throw new RoleAlreadyExistsException();
-        }
-
-        Set<Permission> perms = roleDto.getPermissions().stream()
-                .collect(Collectors.toSet());
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(ga -> ga.getAuthority().equals("ROLE_ADMIN"));
-
-        if (perms.remove(Permission.DELETE) && !isAdmin) {
-            System.out.println("Non-admin user attempted to assign DELETE; stripped out - " +  auth.getName());
-        }
-
-        Role role = new Role();
-        role.setName(roleName);
-        role.setPermissions(perms);
-
-        roleRepository.save(role);
-    }
-
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
-
-
-    private Role resolveRole(String requestedRoleName) {
-        if (!isAdmin()) {
-            return defaultUserRole;
-        }
-        return Optional.ofNullable(requestedRoleName)
-                .map(String::trim)
-                .filter(name -> !name.isEmpty())
-                .flatMap(roleRepository::findByName)
-                .orElse(defaultUserRole);
-    }
-
-    private boolean isAdmin() {
-        return SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }
