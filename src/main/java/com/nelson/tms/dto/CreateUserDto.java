@@ -24,11 +24,5 @@ public class CreateUserDto {
     )
     private String username;
 
-    @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.{12,}$)(?!.*\\s)[A-Za-z\\d!@_-]+$",
-            message = "Password must be at least 12 characters long, contain at least one uppercase letter, no spaces, and only allowed special characters: ! @ _ -"
-    )
-    private String password;
-
     private String role;
 }

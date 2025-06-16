@@ -8,6 +8,7 @@ import com.nelson.tms.exception.UsernameAlreadyExistsException;
 import com.nelson.tms.repository.RoleRepository;
 import com.nelson.tms.repository.UserRepository;
 import com.nelson.tms.service.UserService;
+import com.nelson.tms.utils.RandomPasswordGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private RandomPasswordGenerator randomPasswordGenerator;
 
     private final Role defaultUserRole;
 
@@ -36,11 +38,13 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
-                           AuthenticationManager authenticationManager) {
+                           AuthenticationManager authenticationManager,
+                           RandomPasswordGenerator randomPasswordGenerator) {
         this.userRepository        = userRepository;
         this.roleRepository        = roleRepository;
         this.passwordEncoder       = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.randomPasswordGenerator = randomPasswordGenerator;
         this.defaultUserRole = roleRepository
                 .findByName("ROLE_USER")
                 .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
@@ -53,7 +57,9 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(createUserDto.getUsername());
-        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
+        String randomPassword = randomPasswordGenerator.generateRandomPassword(18);
+        System.out.println("Created "+ user.getUsername() + " with password - " + randomPassword); // -> Logging the password because there is currently no way of sending it to the user (e.g. email service)
+        user.setPassword(passwordEncoder.encode(randomPassword));
         user.setRole(resolveRole(createUserDto.getRole()));
 
         userRepository.save(user);
