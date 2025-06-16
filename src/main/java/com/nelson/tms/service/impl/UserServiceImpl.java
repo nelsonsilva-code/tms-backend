@@ -10,11 +10,15 @@ import com.nelson.tms.repository.UserRepository;
 import com.nelson.tms.service.UserService;
 import com.nelson.tms.utils.RandomPasswordGenerator;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
@@ -31,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private RandomPasswordGenerator randomPasswordGenerator;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final Role defaultUserRole;
 
@@ -58,7 +64,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(createUserDto.getUsername());
         String randomPassword = randomPasswordGenerator.generateRandomPassword(18);
-        System.out.println("Created "+ user.getUsername() + " with password - " + randomPassword); // -> Logging the password because there is currently no way of sending it to the user (e.g. email service)
+        logger.info("Created "+ user.getUsername() + " with password - " + randomPassword); // -> Logging the password because there is currently no way of sending it to the user (e.g. email service)
         user.setPassword(passwordEncoder.encode(randomPassword));
         user.setRole(resolveRole(createUserDto.getRole()));
 
@@ -74,22 +80,34 @@ public class UserServiceImpl implements UserService {
         return HttpStatus.OK;
     }
 
-    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long id) {
-
-        User user = userRepository.findById(id)
+    public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long targetUserId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String callerUsername = auth.getName();
+        User caller = userRepository.findByUsername(callerUsername)
                 .orElseThrow(() -> new UserNotFoundException());
 
+        if (!caller.getId().equals(targetUserId)) {
+            logger.error("❌ Unauthorized attempt: user ID "
+                    + caller.getId() + " tried to change password of user ID " + targetUserId);
+            return HttpStatus.FORBIDDEN;
+        }
+
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    user.getUsername(),
-                    updatePasswordDto.getOldPassword()
-            ));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            callerUsername,
+                            updatePasswordDto.getOldPassword()
+                    )
+            );
         } catch (BadCredentialsException ex) {
+            logger.error("❌ User " + callerUsername + " provided a wrong current password");
             return HttpStatus.UNAUTHORIZED;
         }
 
-        user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
-        userRepository.save(user);
+        caller.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        userRepository.save(caller);
+        logger.info("✅ User " + callerUsername
+                + " (ID " + caller.getId() + ") successfully updated their password");
         return HttpStatus.OK;
     }
 
