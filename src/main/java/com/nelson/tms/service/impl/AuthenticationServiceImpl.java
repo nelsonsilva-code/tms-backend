@@ -78,6 +78,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String role = user.getRole().getName();
 
         JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+        jwtAuthResponse.setUserId(user.getId());
         jwtAuthResponse.setAccessToken(token);
         jwtAuthResponse.setRole(role);
         return jwtAuthResponse;

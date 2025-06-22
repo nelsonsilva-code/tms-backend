@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,10 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public HttpStatus updatePassword(UpdatePasswordDto updatePasswordDto, Long targetUserId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String callerUsername = auth.getName();
-        User caller = userRepository.findByUsername(callerUsername)
-                .orElseThrow(() -> new UserNotFoundException());
+        User caller = getCallingUser();
 
         if (!caller.getId().equals(targetUserId)) {
             logger.error("❌ Unauthorized attempt: user ID "
@@ -95,19 +94,37 @@ public class UserServiceImpl implements UserService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            callerUsername,
-                            updatePasswordDto.getOldPassword()
+                            caller.getUsername(),
+                            updatePasswordDto.getCurrentPassword()
                     )
             );
         } catch (BadCredentialsException ex) {
-            logger.error("❌ User " + callerUsername + " provided a wrong current password");
+            logger.error("❌ User " + caller.getUsername() + " provided a wrong current password");
             return HttpStatus.UNAUTHORIZED;
         }
 
         caller.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
         userRepository.save(caller);
-        logger.info("✅ User " + callerUsername
+        logger.info("✅ User " + caller.getUsername()
                 + " (ID " + caller.getId() + ") successfully updated their password");
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus updateRole(String newRole, Long userId) {
+        logger.info("1");
+
+        System.out.println(newRole);
+        Role role = roleRepository.findByName(newRole).orElseThrow(() -> new IllegalStateException("Given role not found"));
+        logger.info("2");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException());
+        logger.info("3");
+
+        user.setRole(role);
+        logger.info("4");
+        System.out.println(user);
+        userRepository.save(user);
         return HttpStatus.OK;
     }
 
@@ -115,6 +132,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    public User getCurrentUser() {
+        return getCallingUser();
+    }
+    public User getUser(Long id) {
+        User caller = getCallingUser();
+
+        User target = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        if (!caller.getId().equals(target.getId())) {
+            log.error("Unauthorized access: user ID {} tried to fetch user ID {}",
+                    caller.getId(), target.getId());
+            throw new AccessDeniedException("You may only view your own data");
+        }
+
+        return target;
+    }
+
+
+    private User getCallingUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String callerUsername = auth.getName();
+
+        return userRepository.findByUsername(callerUsername)
+                .orElseThrow(() -> new UserNotFoundException());
+    }
 
     private Role resolveRole(String requestedRoleName) {
         if (!isAdmin()) {
